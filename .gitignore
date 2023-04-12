@@ -1,0 +1,7 @@
+configs/*
+config.yaml
+.idea
+log
+*.log
+*.sum
+node-modules
