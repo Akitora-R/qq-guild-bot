@@ -31,9 +31,11 @@ func StartHttpAPI() {
 	guildApi.GET("/member", getPagedMember)
 	guildApi.GET("/member/:userId", getMemberDetail)
 	guildApi.PATCH("/member/:userId", updateMember)
+	guildApi.PUT("/member/:userId/roles/:roleId", updateMemberRole)
 	guildApi.DELETE("/member", banByBatch)
 	guildApi.PUT("/direct_message/:userId", createDirectMessage)
 	guildApi.POST("/direct_message", postDirectMsg)
+	guildApi.GET("/roles", getRoles)
 
 	channelApi := group.Group("/channel/:channelId")
 	channelApi.POST("/message", sendMsg)
@@ -52,11 +54,22 @@ func handleErr(c *gin.Context, err error, data any) {
 	}
 }
 
+func getRoles(c *gin.Context) {
+	roles, err := conn.GetRoles(c.Param("guildId"))
+	handleErr(c, err, roles)
+}
+
 func getMemberDetail(c *gin.Context) {
 	guildId := c.Param("guildId")
 	userId := c.Param("userId")
-	member, err := conn.GuildMember(guildId, userId)
+	member, err := conn.GetGuildMember(guildId, userId)
 	handleErr(c, err, member)
+}
+
+func updateMemberRole(c *gin.Context) {
+	b := util.MustParseReader[dto.MemberAddRoleBody](c.Request.Body)
+	err := conn.AddMemberRole(c.Param("guildId"), c.Param("roleId"), c.Param("userId"), b)
+	handleErr(c, err, nil)
 }
 
 func updateMember(c *gin.Context) {

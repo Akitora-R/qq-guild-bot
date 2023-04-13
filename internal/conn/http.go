@@ -80,8 +80,16 @@ func UpdateUser(u *entity.UserUpdate, guildId, userId string) error {
 	return nil
 }
 
-func GuildMember(guildId, userId string) (*dto.Member, error) {
+func GetGuildMember(guildId, userId string) (*dto.Member, error) {
 	return botApi.GuildMember(botCtx, guildId, userId)
+}
+
+func GetRoles(guildId string) (*dto.GuildRoles, error) {
+	return botApi.Roles(botCtx, guildId)
+}
+
+func AddMemberRole(guildId, roleId, userId string, b *dto.MemberAddRoleBody) error {
+	return botApi.MemberAddRole(botCtx, guildId, dto.RoleID(roleId), userId, b)
 }
 
 func BanByBatch(guildId string, memberIdList []string) error {
