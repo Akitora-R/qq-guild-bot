@@ -4,13 +4,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/tencent-connect/botgo/dto"
 	"html/template"
-	"net/http"
 	apiEntity "qq-guild-bot/internal/api/entity"
 	"qq-guild-bot/internal/conn"
 	connEntity "qq-guild-bot/internal/conn/entity"
 	"qq-guild-bot/internal/embeded"
 	myLogger "qq-guild-bot/internal/pkg/log"
 	"qq-guild-bot/internal/pkg/util"
+	"strconv"
 )
 
 func StartHttpAPI() {
@@ -28,8 +28,9 @@ func StartHttpAPI() {
 		c.JSON(200, conn.GetSelf())
 	})
 	guildApi := group.Group("/guild/:guildId")
-	guildApi.GET("/member", getAllMember)
-	guildApi.PATCH("/member/:userId", updateUser)
+	guildApi.GET("/member", getPagedMember)
+	guildApi.GET("/member/:userId", getMemberDetail)
+	guildApi.PATCH("/member/:userId", updateMember)
 	guildApi.DELETE("/member", banByBatch)
 	guildApi.PUT("/direct_message/:userId", createDirectMessage)
 	guildApi.POST("/direct_message", postDirectMsg)
@@ -51,7 +52,14 @@ func handleErr(c *gin.Context, err error, data any) {
 	}
 }
 
-func updateUser(c *gin.Context) {
+func getMemberDetail(c *gin.Context) {
+	guildId := c.Param("guildId")
+	userId := c.Param("userId")
+	member, err := conn.GuildMember(guildId, userId)
+	handleErr(c, err, member)
+}
+
+func updateMember(c *gin.Context) {
 	u := util.MustParseReader[connEntity.UserUpdate](c.Request.Body)
 	guildId := c.Param("guildId")
 	userId := c.Param("userId")
@@ -92,10 +100,19 @@ func banByBatch(c *gin.Context) {
 	handleErr(c, err, nil)
 }
 
-func getAllMember(c *gin.Context) {
+func getPagedMember(c *gin.Context) {
 	guildId := c.Param("guildId")
-	mList := conn.GetAllMember(guildId)
-	c.JSON(http.StatusOK, apiEntity.NewOkResp(mList, nil))
+	var after string
+	var err error
+	if after = c.Query("after"); after == "" {
+		after = "0"
+	}
+	var limit int
+	if limit, err = strconv.Atoi(c.Query("limit")); err != nil || limit <= 0 || limit > 1000 {
+		limit = 400
+	}
+	mList, err := conn.GuildMembers(guildId, after, limit)
+	handleErr(c, err, mList)
 }
 
 func delMsg(c *gin.Context) {

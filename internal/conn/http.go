@@ -52,22 +52,12 @@ func PostDirectMessage(guildId string, msg *dto.MessageToCreate) (*dto.Message, 
 	}, msg)
 }
 
-func GetAllMember(guildId string) []*dto.Member {
-	var mList []*dto.Member
-	last := "0"
-	for {
-		p := dto.GuildMembersPager{
-			After: last,
-			Limit: "1000",
-		}
-		members, _ := botApi.GuildMembers(botCtx, guildId, &p)
-		if len(members) <= 0 {
-			break
-		}
-		last = members[len(members)-1].User.ID
-		mList = append(mList, members...)
+func GuildMembers(guildId, after string, limit int) ([]*dto.Member, error) {
+	p := dto.GuildMembersPager{
+		After: after,
+		Limit: strconv.Itoa(limit),
 	}
-	return mList
+	return botApi.GuildMembers(botCtx, guildId, &p)
 }
 
 func DelMsg(channelId, messageId string, hideTip bool) error {
@@ -88,6 +78,10 @@ func UpdateUser(u *entity.UserUpdate, guildId, userId string) error {
 		return botApi.MemberMute(botCtx, guildId, userId, updateGuildMute)
 	}
 	return nil
+}
+
+func GuildMember(guildId, userId string) (*dto.Member, error) {
+	return botApi.GuildMember(botCtx, guildId, userId)
 }
 
 func BanByBatch(guildId string, memberIdList []string) error {
