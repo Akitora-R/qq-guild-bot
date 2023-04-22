@@ -92,6 +92,21 @@ func AddMemberRole(guildId, roleId, userId string, b *dto.MemberAddRoleBody) err
 	return botApi.MemberAddRole(botCtx, guildId, dto.RoleID(roleId), userId, b)
 }
 
+func DeleteGuildMember(guildId, userId string, deleteHistoryMsgDay *int, addBlackList *bool) error {
+	var args []dto.MemberDeleteOption
+	if deleteHistoryMsgDay != nil {
+		args = append(args, func(opts *dto.MemberDeleteOpts) {
+			opts.DeleteHistoryMsgDays = *deleteHistoryMsgDay
+		})
+	}
+	if addBlackList != nil {
+		args = append(args, func(opts *dto.MemberDeleteOpts) {
+			opts.AddBlackList = *addBlackList
+		})
+	}
+	return botApi.DeleteGuildMember(botCtx, guildId, userId, args...)
+}
+
 func BanByBatch(guildId string, memberIdList []string) error {
 	var failed []string
 	log.Info("名单长度:", len(memberIdList))

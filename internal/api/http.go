@@ -32,7 +32,7 @@ func StartHttpAPI() {
 	guildApi.GET("/member/:userId", getMemberDetail)
 	guildApi.PATCH("/member/:userId", updateMember)
 	guildApi.PUT("/member/:userId/roles/:roleId", updateMemberRole)
-	guildApi.DELETE("/member", banByBatch)
+	guildApi.DELETE("/member/:userId", deleteMember)
 	guildApi.PUT("/direct_message/:userId", createDirectMessage)
 	guildApi.POST("/direct_message", postDirectMsg)
 	guildApi.GET("/roles", getRoles)
@@ -106,10 +106,24 @@ func postDirectMsg(c *gin.Context) {
 	handleErr(c, err, directMessage)
 }
 
-func banByBatch(c *gin.Context) {
+func deleteMember(c *gin.Context) {
 	guildId := c.Param("guildId")
-	memberIdList := util.MustParseArrayReader[string](c.Request.Body)
-	err := conn.BanByBatch(guildId, memberIdList)
+	userId := c.Param("userId")
+	var delDay *int = nil
+	var addBlackList *bool = nil
+	deleteHistoryMsgDayStr := c.Query("deleteHistoryMsgDay")
+	if day, err := strconv.Atoi(deleteHistoryMsgDayStr); err != nil {
+		delDay = &day
+	}
+	addBlackListStr := c.Query("addBlackList")
+	if addBlackListStr == "true" {
+		var b = true
+		addBlackList = &b
+	} else if addBlackListStr == "false" {
+		var b = false
+		addBlackList = &b
+	}
+	err := conn.DeleteGuildMember(guildId, userId, delDay, addBlackList)
 	handleErr(c, err, nil)
 }
 
