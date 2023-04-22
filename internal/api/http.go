@@ -1,9 +1,11 @@
 package api
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/tencent-connect/botgo/dto"
 	"html/template"
+	"io"
 	apiEntity "qq-guild-bot/internal/api/entity"
 	"qq-guild-bot/internal/conn"
 	connEntity "qq-guild-bot/internal/conn/entity"
@@ -67,8 +69,12 @@ func getMemberDetail(c *gin.Context) {
 }
 
 func updateMemberRole(c *gin.Context) {
-	b := util.MustParseReader[dto.MemberAddRoleBody](c.Request.Body)
-	err := conn.AddMemberRole(c.Param("guildId"), c.Param("roleId"), c.Param("userId"), b)
+	bodyBytes, err := io.ReadAll(c.Request.Body)
+	var b dto.MemberAddRoleBody
+	if err == nil {
+		_ = json.Unmarshal(bodyBytes, &b)
+	}
+	err = conn.AddMemberRole(c.Param("guildId"), c.Param("roleId"), c.Param("userId"), &b)
 	handleErr(c, err, nil)
 }
 
