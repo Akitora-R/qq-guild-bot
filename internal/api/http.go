@@ -35,8 +35,8 @@ func StartHttpAPI() {
 	guildApi.PATCH("/member/:userId", updateMember)
 	guildApi.PUT("/member/:userId/roles/:roleId", updateMemberRole)
 	guildApi.DELETE("/member/:userId", deleteMember)
-	guildApi.PUT("/direct_message/:userId", createDirectMessage)
-	guildApi.POST("/direct_message", postDirectMsg)
+	guildApi.PUT("/direct-message/:userId", createDirectMessage)
+	guildApi.POST("/direct-message", postDirectMessage)
 	guildApi.GET("/roles", getRoles)
 
 	channelApi := group.Group("/channel/:channelId")
@@ -94,7 +94,7 @@ func sendMsg(c *gin.Context) {
 	if len(m.Attachments) > 0 {
 		attachmentBytes = m.Attachments[0].ToBytes()
 	}
-	resp, err = conn.PostMsg(m.ToContent(), m.ID, cId, attachmentBytes)
+	resp, err = conn.PostMessage(m.ToContent(), m.ID, cId, attachmentBytes)
 	handleErr(c, err, resp)
 }
 
@@ -105,7 +105,7 @@ func createDirectMessage(c *gin.Context) {
 	handleErr(c, err, message)
 }
 
-func postDirectMsg(c *gin.Context) {
+func postDirectMessage(c *gin.Context) {
 	guildId := c.Param("guildId")
 	b := util.MustParseReader[dto.MessageToCreate](c.Request.Body)
 	directMessage, err := conn.PostDirectMessage(guildId, b)

@@ -19,7 +19,7 @@ func GetSelf() dto.User {
 	return *selfInfo
 }
 
-func PostMsg(content, msgId, channelId string, fileImage []byte) (entity.SendMessageResponse, error) {
+func PostMessage(content, msgId, channelId string, fileImage []byte) (entity.SendMessageResponse, error) {
 	authToken := fmt.Sprintf("%s.%s", strconv.FormatUint(config.AppConf.AppID, 10), config.AppConf.AccessToken)
 	req := resty.New().R().SetAuthScheme("Bot").SetAuthToken(authToken)
 	if len(fileImage) > 0 {
