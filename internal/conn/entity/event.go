@@ -7,12 +7,15 @@ import (
 type EventType string
 
 const (
-	Message           EventType = "MESSAGE"
-	MessageDelete     EventType = "MESSAGE_DELETE"
-	DirectMessage     EventType = "DIRECT_MESSAGE"
-	GuildMemberAdd    EventType = "GUILD_MEMBER_ADD"
-	GuildMemberUpdate EventType = "GUILD_MEMBER_UPDATE"
-	GuildMemberRemove EventType = "GUILD_MEMBER_REMOVE"
+	Message               EventType = "MESSAGE"
+	MessageDelete         EventType = "MESSAGE_DELETE"
+	DirectMessage         EventType = "DIRECT_MESSAGE"
+	GuildMemberAdd        EventType = "GUILD_MEMBER_ADD"
+	GuildMemberUpdate     EventType = "GUILD_MEMBER_UPDATE"
+	GuildMemberRemove     EventType = "GUILD_MEMBER_REMOVE"
+	MessageReactionAdd    EventType = "MESSAGE_REACTION_ADD"
+	MessageReactionRemove EventType = "MESSAGE_REACTION_REMOVE"
+	InteractionCreate     EventType = "INTERACTION_CREATE"
 )
 
 type GuildEvent[T any] struct {
@@ -33,6 +36,14 @@ type MessageDeleteEventData struct {
 
 type MemberEventData struct {
 	*dto.Member
+}
+
+type MessageReactionEventData struct {
+	*dto.MessageReaction
+}
+
+type InteractionEventData struct {
+	*dto.Interaction
 }
 
 func NewMessageEvent(id string, self *dto.User, d *dto.Message) *GuildEvent[MessageEventData] {
@@ -80,5 +91,23 @@ func newMemberEventData(id string, self *dto.User, member *dto.Member, eventType
 		EventType: eventType,
 		Self:      self,
 		Data:      &MemberEventData{Member: member},
+	}
+}
+
+func NewMessageReactionEventData(id string, self *dto.User, eventType EventType, data *dto.MessageReaction) *GuildEvent[MessageReactionEventData] {
+	return &GuildEvent[MessageReactionEventData]{
+		Id:        id,
+		EventType: eventType,
+		Self:      self,
+		Data:      &MessageReactionEventData{MessageReaction: data},
+	}
+}
+
+func NewInteractionEventData(id string, self *dto.User, data *dto.Interaction) *GuildEvent[InteractionEventData] {
+	return &GuildEvent[InteractionEventData]{
+		Id:        id,
+		EventType: InteractionCreate,
+		Self:      self,
+		Data:      &InteractionEventData{Interaction: data},
 	}
 }

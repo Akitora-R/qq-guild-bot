@@ -67,6 +67,8 @@ func startGuildBotWS(ch chan any, conf config.Config) {
 			directMessageEventHandler(cha),
 			messageDeleteEventHandler(cha),
 			memberEventHandler(cha),
+			messageReactionEventHandler(cha),
+			interactionEventHandler(cha),
 		)
 		err = botgo.NewSessionManager().Start(ws, t, &intent)
 		if err != nil {
@@ -110,6 +112,22 @@ func memberEventHandler(ch chan any) event.GuildMemberEventHandler {
 		default:
 			return errors.New("未知类型：" + string(event.Type))
 		}
+		return nil
+	}
+}
+
+func messageReactionEventHandler(ch chan any) event.MessageReactionEventHandler {
+	return func(event *dto.WSPayload, data *dto.WSMessageReactionData) error {
+		var t = entity.EventType(event.Type)
+		ch <- entity.NewMessageReactionEventData(event.Id, selfInfo, t, (*dto.MessageReaction)(data))
+		return nil
+	}
+}
+
+func interactionEventHandler(ch chan any) event.InteractionEventHandler {
+	return func(event *dto.WSPayload, data *dto.WSInteractionData) error {
+		log.Info(string(event.RawMessage))
+		ch <- entity.NewInteractionEventData(event.Id, selfInfo, (*dto.Interaction)(data))
 		return nil
 	}
 }
