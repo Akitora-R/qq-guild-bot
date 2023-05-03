@@ -92,6 +92,10 @@ func AddMemberRole(guildId, roleId, userId string, b *dto.MemberAddRoleBody) err
 	return botApi.MemberAddRole(botCtx, guildId, dto.RoleID(roleId), userId, b)
 }
 
+func DeleteMemberRole(guildId, roleId, userId string, b *dto.MemberAddRoleBody) error {
+	return botApi.MemberDeleteRole(botCtx, guildId, dto.RoleID(roleId), userId, b)
+}
+
 func DeleteGuildMember(guildId, userId string, deleteHistoryMsgDay *int, addBlackList *bool) error {
 	var args []dto.MemberDeleteOption
 	if deleteHistoryMsgDay != nil {

@@ -34,6 +34,7 @@ func StartHttpAPI() {
 	guildApi.GET("/member/:userId", getMemberDetail)
 	guildApi.PATCH("/member/:userId", updateMember)
 	guildApi.PUT("/member/:userId/roles/:roleId", updateMemberRole)
+	guildApi.DELETE("/member/:userId/roles/:roleId", deleteMemberRole)
 	guildApi.DELETE("/member/:userId", deleteMember)
 	guildApi.PUT("/direct-message/:userId", createDirectMessage)
 	guildApi.POST("/direct-message", postDirectMessage)
@@ -75,6 +76,16 @@ func updateMemberRole(c *gin.Context) {
 		_ = json.Unmarshal(bodyBytes, &b)
 	}
 	err = conn.AddMemberRole(c.Param("guildId"), c.Param("roleId"), c.Param("userId"), &b)
+	handleErr(c, err, nil)
+}
+
+func deleteMemberRole(c *gin.Context) {
+	bodyBytes, err := io.ReadAll(c.Request.Body)
+	var b dto.MemberAddRoleBody
+	if err == nil {
+		_ = json.Unmarshal(bodyBytes, &b)
+	}
+	err = conn.DeleteMemberRole(c.Param("guildId"), c.Param("roleId"), c.Param("userId"), &b)
 	handleErr(c, err, nil)
 }
 
