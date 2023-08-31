@@ -10,17 +10,16 @@ import (
 	"github.com/tencent-connect/botgo/log"
 	"github.com/tencent-connect/botgo/openapi"
 	"qq-guild-bot/internal/conn/entity"
-	"qq-guild-bot/internal/pkg/config"
 	"strconv"
 	"strings"
 )
 
-func GetSelf() dto.User {
-	return *selfInfo
+func (b *Bot) GetSelf() *dto.User {
+	return b.selfInfo
 }
 
-func PostMessage(content, msgId, channelId string, fileImage []byte) (entity.SendMessageResponse, error) {
-	authToken := fmt.Sprintf("%s.%s", strconv.FormatUint(config.AppConf.AppID, 10), config.AppConf.AccessToken)
+func (b *Bot) PostMessage(content, msgId, channelId string, fileImage []byte) (entity.SendMessageResponse, error) {
+	authToken := fmt.Sprintf("%s.%s", strconv.FormatUint(b.config.AppID, 10), b.config.AccessToken)
 	req := resty.New().R().SetAuthScheme("Bot").SetAuthToken(authToken)
 	if len(fileImage) > 0 {
 		req.SetFileReader("file_image", "file_name.jpg", bytes.NewReader(fileImage))
@@ -28,7 +27,7 @@ func PostMessage(content, msgId, channelId string, fileImage []byte) (entity.Sen
 	r, err := req.SetMultipartFormData(map[string]string{
 		"content": content,
 		"msg_id":  msgId,
-	}).SetPathParam("channel_id", channelId).Post(config.BaseApi + "/channels/{channel_id}/messages")
+	}).SetPathParam("channel_id", channelId).Post(b.config.Endpoint + "/channels/{channel_id}/messages")
 	var resp entity.SendMessageResponse
 	if err != nil {
 		return resp, err
@@ -39,64 +38,64 @@ func PostMessage(content, msgId, channelId string, fileImage []byte) (entity.Sen
 	return resp, err
 }
 
-func CreateDirectMessage(sourceGuildId, recipientId string) (*dto.DirectMessage, error) {
-	return botApi.CreateDirectMessage(botCtx, &dto.DirectMessageToCreate{
+func (b *Bot) CreateDirectMessage(sourceGuildId, recipientId string) (*dto.DirectMessage, error) {
+	return b.api.CreateDirectMessage(b.ctx, &dto.DirectMessageToCreate{
 		SourceGuildID: sourceGuildId,
 		RecipientID:   recipientId,
 	})
 }
 
-func PostDirectMessage(guildId string, msg *dto.MessageToCreate) (*dto.Message, error) {
-	return botApi.PostDirectMessage(botCtx, &dto.DirectMessage{
+func (b *Bot) PostDirectMessage(guildId string, msg *dto.MessageToCreate) (*dto.Message, error) {
+	return b.api.PostDirectMessage(b.ctx, &dto.DirectMessage{
 		GuildID: guildId,
 	}, msg)
 }
 
-func GuildMembers(guildId, after string, limit int) ([]*dto.Member, error) {
+func (b *Bot) GuildMembers(guildId, after string, limit int) ([]*dto.Member, error) {
 	p := dto.GuildMembersPager{
 		After: after,
 		Limit: strconv.Itoa(limit),
 	}
-	return botApi.GuildMembers(botCtx, guildId, &p)
+	return b.api.GuildMembers(b.ctx, guildId, &p)
 }
 
-func DelMsg(channelId, messageId string, hideTip bool) error {
+func (b *Bot) DelMsg(channelId, messageId string, hideTip bool) error {
 	var err error
 	if hideTip {
-		err = botApi.RetractMessage(botCtx, channelId, messageId, openapi.RetractMessageOptionHidetip)
+		err = b.api.RetractMessage(b.ctx, channelId, messageId, openapi.RetractMessageOptionHidetip)
 	} else {
-		err = botApi.RetractMessage(botCtx, channelId, messageId)
+		err = b.api.RetractMessage(b.ctx, channelId, messageId)
 	}
 	return err
 }
 
-func UpdateUser(u *entity.UserUpdate, guildId, userId string) error {
+func (b *Bot) UpdateUser(u *entity.UserUpdate, guildId, userId string) error {
 	if u.MuteSecond != nil {
 		updateGuildMute := &dto.UpdateGuildMute{
 			MuteSeconds: strconv.Itoa(*u.MuteSecond),
 		}
-		return botApi.MemberMute(botCtx, guildId, userId, updateGuildMute)
+		return b.api.MemberMute(b.ctx, guildId, userId, updateGuildMute)
 	}
 	return nil
 }
 
-func GetGuildMember(guildId, userId string) (*dto.Member, error) {
-	return botApi.GuildMember(botCtx, guildId, userId)
+func (b *Bot) GetGuildMember(guildId, userId string) (*dto.Member, error) {
+	return b.api.GuildMember(b.ctx, guildId, userId)
 }
 
-func GetRoles(guildId string) (*dto.GuildRoles, error) {
-	return botApi.Roles(botCtx, guildId)
+func (b *Bot) GetRoles(guildId string) (*dto.GuildRoles, error) {
+	return b.api.Roles(b.ctx, guildId)
 }
 
-func AddMemberRole(guildId, roleId, userId string, b *dto.MemberAddRoleBody) error {
-	return botApi.MemberAddRole(botCtx, guildId, dto.RoleID(roleId), userId, b)
+func (b *Bot) AddMemberRole(guildId, roleId, userId string, body *dto.MemberAddRoleBody) error {
+	return b.api.MemberAddRole(b.ctx, guildId, dto.RoleID(roleId), userId, body)
 }
 
-func DeleteMemberRole(guildId, roleId, userId string, b *dto.MemberAddRoleBody) error {
-	return botApi.MemberDeleteRole(botCtx, guildId, dto.RoleID(roleId), userId, b)
+func (b *Bot) DeleteMemberRole(guildId, roleId, userId string, body *dto.MemberAddRoleBody) error {
+	return b.api.MemberDeleteRole(b.ctx, guildId, dto.RoleID(roleId), userId, body)
 }
 
-func DeleteGuildMember(guildId, userId string, deleteHistoryMsgDay *int, addBlackList *bool) error {
+func (b *Bot) DeleteGuildMember(guildId, userId string, deleteHistoryMsgDay *int, addBlackList *bool) error {
 	var args []dto.MemberDeleteOption
 	if deleteHistoryMsgDay != nil {
 		args = append(args, func(opts *dto.MemberDeleteOpts) {
@@ -108,15 +107,15 @@ func DeleteGuildMember(guildId, userId string, deleteHistoryMsgDay *int, addBlac
 			opts.AddBlackList = *addBlackList
 		})
 	}
-	return botApi.DeleteGuildMember(botCtx, guildId, userId, args...)
+	return b.api.DeleteGuildMember(b.ctx, guildId, userId, args...)
 }
 
-func BanByBatch(guildId string, memberIdList []string) error {
+func (b *Bot) BanByBatch(guildId string, memberIdList []string) error {
 	var failed []string
 	log.Info("名单长度:", len(memberIdList))
 	for _, mId := range memberIdList {
 		log.Info("ban: ", mId)
-		if err := botApi.DeleteGuildMember(botCtx, guildId, mId); err != nil {
+		if err := b.api.DeleteGuildMember(b.ctx, guildId, mId); err != nil {
 			log.Error(err)
 			failed = append(failed, mId)
 		}

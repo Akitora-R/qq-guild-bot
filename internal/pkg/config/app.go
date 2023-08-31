@@ -6,10 +6,16 @@ import (
 )
 
 type Config struct {
-	AppID         uint64         `yaml:"appID"`
-	AccessToken   string         `yaml:"accessToken"`
-	Sandbox       bool           `yaml:"sandbox"`
-	ServerConfigs []ServerConfig `yaml:"server"`
+	Bot    []BotConfig    `yaml:"bot"`
+	Server []ServerConfig `yaml:"server"`
+}
+
+type BotConfig struct {
+	AppID       uint64 `yaml:"appID"`
+	AccessToken string `yaml:"accessToken"`
+	Sandbox     bool   `yaml:"sandbox"`
+	Endpoint    string `yaml:"endpoint"`
+	Tag         string `yaml:"tag"`
 }
 
 type ServerConfig struct {
@@ -18,7 +24,6 @@ type ServerConfig struct {
 }
 
 var AppConf Config
-var BaseApi string
 
 func init() {
 	file, err := os.ReadFile("./config.yaml")
@@ -28,9 +33,11 @@ func init() {
 	if err = yaml.Unmarshal(file, &AppConf); err != nil {
 		panic(err)
 	}
-	if AppConf.Sandbox {
-		BaseApi = "https://sandbox.api.sgroup.qq.com"
-	} else {
-		BaseApi = "https://api.sgroup.qq.com"
+	for _, config := range AppConf.Bot {
+		if config.Sandbox {
+			config.Endpoint = "https://sandbox.api.sgroup.qq.com"
+		} else {
+			config.Endpoint = "https://api.sgroup.qq.com"
+		}
 	}
 }
