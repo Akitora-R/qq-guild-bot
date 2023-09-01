@@ -12,7 +12,7 @@ import (
 
 const bufferSize = 100
 
-var Bots = map[uint64]*Bot{}
+var Bots = map[string]*Bot{}
 
 // StartGuildEventListen https://github.com/tencent-connect/botgo/tree/master/examples
 func StartGuildEventListen() {
@@ -21,7 +21,7 @@ func StartGuildEventListen() {
 		ch := make(chan any, bufferSize)
 		for _, botConfig := range conf.Bot {
 			bot := NewBot(botConfig, ch)
-			Bots[bot.config.AppID] = bot
+			Bots[bot.selfInfo.ID] = bot
 			go func() {
 				err := bot.Start()
 				if err != nil {

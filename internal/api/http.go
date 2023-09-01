@@ -55,8 +55,8 @@ func StartHttpAPI() {
 }
 
 func getBotInstance(c *gin.Context) (*conn.Bot, error) {
-	selfAppId, err := strconv.ParseUint(c.GetHeader("self"), 10, 64)
-	if err != nil {
+	selfId := c.GetHeader("self")
+	if selfId == "" {
 		if len(conn.Bots) <= 0 {
 			return nil, errors.New("no available bot instance")
 		}
@@ -64,7 +64,11 @@ func getBotInstance(c *gin.Context) (*conn.Bot, error) {
 			return bot, nil
 		}
 	}
-	return conn.Bots[selfAppId], nil
+	bot := conn.Bots[selfId]
+	if bot == nil {
+		return nil, errors.New("invalid self id: " + selfId)
+	}
+	return bot, nil
 }
 
 func handle(handler func(c *gin.Context, bot *conn.Bot)) func(c *gin.Context) {
