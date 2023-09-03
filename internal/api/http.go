@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/tencent-connect/botgo/dto"
 	"html/template"
@@ -27,14 +26,9 @@ func StartHttpAPI() {
 		})
 	})
 	group := engine.Group("/api")
-	group.GET("/me", func(c *gin.Context) {
-		botInstance, err := getBotInstance(c)
-		if err != nil {
-			handleErr(c, err, nil)
-			return
-		}
-		c.JSON(200, botInstance.GetSelf())
-	})
+	group.GET("/me", handle(func(c *gin.Context, bot *conn.Bot) {
+		handleErr(c, nil, bot.GetSelf())
+	}))
 	guildApi := group.Group("/guild/:guildId")
 	guildApi.GET("/member", handle(getPagedMember))
 	guildApi.GET("/member/:userId", handle(getMemberDetail))
@@ -54,26 +48,9 @@ func StartHttpAPI() {
 	}
 }
 
-func getBotInstance(c *gin.Context) (*conn.Bot, error) {
-	selfId := c.GetHeader("self")
-	if selfId == "" {
-		if len(conn.Bots) <= 0 {
-			return nil, errors.New("no available bot instance")
-		}
-		for _, bot := range conn.Bots {
-			return bot, nil
-		}
-	}
-	bot := conn.Bots[selfId]
-	if bot == nil {
-		return nil, errors.New("invalid self id: " + selfId)
-	}
-	return bot, nil
-}
-
 func handle(handler func(c *gin.Context, bot *conn.Bot)) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		botInstance, err := getBotInstance(c)
+		botInstance, err := conn.GetBotInstance(c.GetHeader("self"))
 		if err != nil {
 			handleErr(c, err, nil)
 			return

@@ -8,11 +8,28 @@ import (
 	"qq-guild-bot/internal/conn/entity"
 	"qq-guild-bot/internal/pkg/config"
 	"qq-guild-bot/internal/pkg/util/http"
+	"time"
 )
 
 const bufferSize = 100
 
-var Bots = map[string]*Bot{}
+var bots = map[string]*Bot{}
+
+func GetBotInstance(id string) (*Bot, error) {
+	if id == "" {
+		if len(bots) <= 0 {
+			return nil, errors.New("no available bot instance")
+		}
+		for _, bot := range bots {
+			return bot, nil
+		}
+	}
+	bot := bots[id]
+	if bot == nil {
+		return nil, errors.New("invalid self id: " + id)
+	}
+	return bot, nil
+}
 
 // StartGuildEventListen https://github.com/tencent-connect/botgo/tree/master/examples
 func StartGuildEventListen() {
@@ -21,13 +38,19 @@ func StartGuildEventListen() {
 		ch := make(chan any, bufferSize)
 		for _, botConfig := range conf.Bot {
 			bot := NewBot(botConfig, ch)
-			Bots[bot.selfInfo.ID] = bot
 			go func() {
-				err := bot.Start()
-				if err != nil {
+				if err := bot.Start(); err != nil {
 					slog.Error("start bot failed", err, bot)
 				}
 			}()
+			for i := 0; i < 10; i++ {
+				if bot.GetSelf() != nil {
+					bots[bot.selfInfo.ID] = bot
+					slog.Info("bot login", "id", bot.selfInfo.ID)
+					break
+				}
+				time.Sleep(time.Second)
+			}
 		}
 		for data := range ch {
 			for _, rep := range conf.Server {

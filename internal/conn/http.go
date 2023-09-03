@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"github.com/tencent-connect/botgo/dto"
-	"github.com/tencent-connect/botgo/log"
 	"github.com/tencent-connect/botgo/openapi"
+	"log/slog"
 	"qq-guild-bot/internal/conn/entity"
 	"strconv"
 	"strings"
@@ -33,7 +33,7 @@ func (b *Bot) PostMessage(content, msgId, channelId string, fileImage []byte) (e
 		return resp, err
 	}
 	respBody := r.Body()
-	log.Info(string(respBody))
+	slog.Info(string(respBody))
 	err = json.Unmarshal(respBody, &resp)
 	return resp, err
 }
@@ -112,11 +112,11 @@ func (b *Bot) DeleteGuildMember(guildId, userId string, deleteHistoryMsgDay *int
 
 func (b *Bot) BanByBatch(guildId string, memberIdList []string) error {
 	var failed []string
-	log.Info("名单长度:", len(memberIdList))
+	slog.Info("", "名单长度", len(memberIdList))
 	for _, mId := range memberIdList {
-		log.Info("ban: ", mId)
+		slog.Info("", "ban", mId)
 		if err := b.api.DeleteGuildMember(b.ctx, guildId, mId); err != nil {
-			log.Error(err)
+			slog.Error("", "err", err)
 			failed = append(failed, mId)
 		}
 	}
