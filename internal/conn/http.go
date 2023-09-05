@@ -33,7 +33,6 @@ func (b *Bot) PostMessage(content, msgId, channelId string, fileImage []byte) (e
 		return resp, err
 	}
 	respBody := r.Body()
-	slog.Info(string(respBody))
 	err = json.Unmarshal(respBody, &resp)
 	return resp, err
 }

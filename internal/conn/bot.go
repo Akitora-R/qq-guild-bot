@@ -7,6 +7,7 @@ import (
 	"github.com/tencent-connect/botgo/dto"
 	"github.com/tencent-connect/botgo/event"
 	"github.com/tencent-connect/botgo/openapi"
+	"github.com/tencent-connect/botgo/sessions/local"
 	"github.com/tencent-connect/botgo/token"
 	"log/slog"
 	"qq-guild-bot/internal/pkg/config"
@@ -59,7 +60,7 @@ func (b *Bot) Start() error {
 		b.interactionEventHandler(),
 	)
 	t := token.BotToken(b.config.AppID, b.config.AccessToken)
-	return botgo.NewSessionManager().Start(ws, t, handler)
+	return local.New().Start(ws, t, handler)
 }
 
 func GetBotInstance(id string) (*Bot, error) {
