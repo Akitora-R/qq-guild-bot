@@ -29,6 +29,14 @@ func StartHttpAPI() {
 	group.GET("/me", handle(func(c *gin.Context, bot *conn.Bot) {
 		handleErr(c, nil, bot.GetSelf())
 	}))
+	group.GET("/bots", func(c *gin.Context) {
+		instances := conn.GetBotInstances()
+		m := map[string]*dto.User{}
+		for k, bot := range instances {
+			m[k] = bot.GetSelf()
+		}
+		c.JSON(200, m)
+	})
 	guildApi := group.Group("/guild/:guildId")
 	guildApi.GET("/member", handle(getPagedMember))
 	guildApi.GET("/member/:userId", handle(getMemberDetail))

@@ -33,11 +33,11 @@ func init() {
 	if err = yaml.Unmarshal(file, &AppConf); err != nil {
 		panic(err)
 	}
-	for _, config := range AppConf.Bot {
-		if config.Sandbox {
-			config.Endpoint = "https://sandbox.api.sgroup.qq.com"
+	for i := range AppConf.Bot {
+		if AppConf.Bot[i].Sandbox {
+			AppConf.Bot[i].Endpoint = "https://sandbox.api.sgroup.qq.com"
 		} else {
-			config.Endpoint = "https://api.sgroup.qq.com"
+			AppConf.Bot[i].Endpoint = "https://api.sgroup.qq.com"
 		}
 	}
 }

@@ -15,22 +15,6 @@ const bufferSize = 100
 
 var bots = map[string]*Bot{}
 
-func GetBotInstance(id string) (*Bot, error) {
-	if id == "" {
-		if len(bots) <= 0 {
-			return nil, errors.New("no available bot instance")
-		}
-		for _, bot := range bots {
-			return bot, nil
-		}
-	}
-	bot := bots[id]
-	if bot == nil {
-		return nil, errors.New("invalid self id: " + id)
-	}
-	return bot, nil
-}
-
 // StartGuildEventListen https://github.com/tencent-connect/botgo/tree/master/examples
 func StartGuildEventListen() {
 	conf := config.AppConf
@@ -64,7 +48,7 @@ func StartGuildEventListen() {
 
 func (b *Bot) messageEventHandler() event.MessageEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSMessageData) error {
-		slog.Info("消息", "id", data.ID)
+		slog.Info("消息", "bot", b.selfInfo.ID, "id", data.ID)
 		b.ch <- entity.NewMessageEvent(event.Id, b.selfInfo, (*dto.Message)(data))
 		return nil
 	}

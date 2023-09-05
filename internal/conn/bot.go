@@ -2,11 +2,12 @@ package conn
 
 import (
 	"context"
+	"errors"
 	"github.com/tencent-connect/botgo"
 	"github.com/tencent-connect/botgo/dto"
+	"github.com/tencent-connect/botgo/event"
 	"github.com/tencent-connect/botgo/openapi"
 	"github.com/tencent-connect/botgo/token"
-	"github.com/tencent-connect/botgo/websocket"
 	"log/slog"
 	"qq-guild-bot/internal/pkg/config"
 	"time"
@@ -47,9 +48,9 @@ func (b *Bot) Start() error {
 	if err != nil {
 		return err
 	}
-	slog.Info("self: ", selfInfo)
 	b.selfInfo = selfInfo
-	intent := websocket.RegisterHandlers(
+	slog.Info("bot started", "self", b.selfInfo)
+	handler := event.NewHandler(
 		b.messageEventHandler(),
 		b.directMessageEventHandler(),
 		b.messageDeleteEventHandler(),
@@ -58,5 +59,25 @@ func (b *Bot) Start() error {
 		b.interactionEventHandler(),
 	)
 	t := token.BotToken(b.config.AppID, b.config.AccessToken)
-	return botgo.NewSessionManager().Start(ws, t, &intent)
+	return botgo.NewSessionManager().Start(ws, t, handler)
+}
+
+func GetBotInstance(id string) (*Bot, error) {
+	if id == "" {
+		if len(bots) <= 0 {
+			return nil, errors.New("no available bot instance")
+		}
+		for _, bot := range bots {
+			return bot, nil
+		}
+	}
+	bot := bots[id]
+	if bot == nil {
+		return nil, errors.New("invalid self id: " + id)
+	}
+	return bot, nil
+}
+
+func GetBotInstances() map[string]*Bot {
+	return bots
 }
