@@ -95,7 +95,7 @@ func (b *Bot) messageReactionEventHandler() event.MessageReactionEventHandler {
 
 func (b *Bot) interactionEventHandler() event.InteractionEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSInteractionData) error {
-		slog.Info(string(event.RawMessage))
+		slog.Info("interaction event", "data", string(event.RawMessage))
 		b.ch <- entity.NewInteractionEventData(event.Id, b.selfInfo, (*dto.Interaction)(data))
 		return nil
 	}
