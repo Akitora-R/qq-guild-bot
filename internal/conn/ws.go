@@ -48,7 +48,7 @@ func StartGuildEventListen() {
 
 func (b *Bot) messageEventHandler() event.MessageEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSMessageData) error {
-		slog.Info("收到消息", "bot", b.selfInfo.ID, "id", data.ID, "content", data.Content)
+		slog.Info("收到消息", "self", b.selfInfo.ID, "id", data.ID, "guildID", data.GuildID, "userID", data.Author.ID, "content", data.Content)
 		b.ch <- entity.NewMessageEvent(event.Id, b.selfInfo, (*dto.Message)(data))
 		return nil
 	}
@@ -56,7 +56,7 @@ func (b *Bot) messageEventHandler() event.MessageEventHandler {
 
 func (b *Bot) directMessageEventHandler() event.DirectMessageEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSDirectMessageData) error {
-		slog.Info("私信id: ", data.ID)
+		slog.Info("收到私信", "self", b.selfInfo.ID, "id", data.ID, "guildID", data.GuildID, "userID", data.Author.ID, "content", data.Content)
 		b.ch <- entity.NewDirectMessageEvent(event.Id, b.selfInfo, (*dto.Message)(data))
 		return nil
 	}
