@@ -9,6 +9,7 @@ import (
 	"github.com/tencent-connect/botgo/dto"
 	"github.com/tencent-connect/botgo/openapi"
 	"log/slog"
+	apiEntity "qq-guild-bot/internal/api/entity"
 	"qq-guild-bot/internal/conn/entity"
 	"strconv"
 	"strings"
@@ -18,15 +19,16 @@ func (b *Bot) GetSelf() *dto.User {
 	return b.selfInfo
 }
 
-func (b *Bot) PostMessage(content, msgId, channelId string, fileImage []byte) (entity.SendMessageResponse, error) {
+func (b *Bot) PostMessage(channelId string, m *apiEntity.Message, fileImage []byte) (entity.SendMessageResponse, error) {
 	authToken := fmt.Sprintf("%s.%s", strconv.FormatUint(b.config.AppID, 10), b.config.AccessToken)
 	req := resty.New().R().SetAuthScheme("Bot").SetAuthToken(authToken)
 	if len(fileImage) > 0 {
 		req.SetFileReader("file_image", "file_name.jpg", bytes.NewReader(fileImage))
 	}
 	r, err := req.SetMultipartFormData(map[string]string{
-		"content": content,
-		"msg_id":  msgId,
+		"content":  m.ToContent(),
+		"msg_id":   m.MsgId,
+		"event_id": m.EventId,
 	}).SetPathParam("channel_id", channelId).Post(b.config.Endpoint + "/channels/{channel_id}/messages")
 	var resp entity.SendMessageResponse
 	if err != nil {

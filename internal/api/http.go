@@ -6,6 +6,7 @@ import (
 	"github.com/tencent-connect/botgo/dto"
 	"html/template"
 	"io"
+	"log/slog"
 	apiEntity "qq-guild-bot/internal/api/entity"
 	"qq-guild-bot/internal/conn"
 	connEntity "qq-guild-bot/internal/conn/entity"
@@ -16,8 +17,9 @@ import (
 )
 
 func StartHttpAPI() {
+	logger := slog.New(slog.Default().Handler())
 	engine := gin.New()
-	engine.Use(gin.Recovery(), myLogger.GinLoggerMiddleware())
+	engine.Use(gin.Recovery(), myLogger.New(logger))
 	temp := template.Must(template.New("").Delims("[[", "]]").ParseFS(embeded.WebFiles, "web/template/*.html"))
 	engine.SetHTMLTemplate(temp)
 	engine.GET("/", func(ctx *gin.Context) {
@@ -124,7 +126,7 @@ func sendMsg(c *gin.Context, bot *conn.Bot) {
 	if len(m.Attachments) > 0 {
 		attachmentBytes = m.Attachments[0].ToBytes()
 	}
-	resp, err = bot.PostMessage(m.ToContent(), m.ID, cId, attachmentBytes)
+	resp, err = bot.PostMessage(cId, m, attachmentBytes)
 	handleErr(c, err, resp)
 }
 

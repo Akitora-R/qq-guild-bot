@@ -17,7 +17,8 @@ const (
 )
 
 type Message struct {
-	ID          string        `json:"id"`
+	EventId     string        `json:"event_id,omitempty"`
+	MsgId       string        `json:"msg_id,omitempty"`
 	Messages    []MessageData `json:"messages"`
 	Attachments []Attachment  `json:"attachments"`
 }

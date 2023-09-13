@@ -48,7 +48,7 @@ func StartGuildEventListen() {
 
 func (b *Bot) messageEventHandler() event.MessageEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSMessageData) error {
-		slog.Info("收到消息", "self", b.selfInfo.ID, "id", data.ID, "guildID", data.GuildID, "userID", data.Author.ID, "content", data.Content)
+		slog.Info("收到消息", "self", b.selfInfo.ID, "id", event.Id, "guildID", data.GuildID, "userID", data.Author.ID, "content", data.Content)
 		b.ch <- entity.NewMessageEvent(event.Id, b.selfInfo, (*dto.Message)(data))
 		return nil
 	}
@@ -56,7 +56,7 @@ func (b *Bot) messageEventHandler() event.MessageEventHandler {
 
 func (b *Bot) directMessageEventHandler() event.DirectMessageEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSDirectMessageData) error {
-		slog.Info("收到私信", "self", b.selfInfo.ID, "id", data.ID, "guildID", data.GuildID, "userID", data.Author.ID, "content", data.Content)
+		slog.Info("收到私信", "self", b.selfInfo.ID, "id", event.Id, "guildID", data.GuildID, "userID", data.Author.ID, "content", data.Content)
 		b.ch <- entity.NewDirectMessageEvent(event.Id, b.selfInfo, (*dto.Message)(data))
 		return nil
 	}
@@ -71,6 +71,7 @@ func (b *Bot) messageDeleteEventHandler() event.MessageDeleteEventHandler {
 
 func (b *Bot) memberEventHandler() event.GuildMemberEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSGuildMemberData) error {
+		slog.Info("频道成员事件", "self", b.selfInfo.ID, "id", event.Id, "type", event.Type)
 		switch event.Type {
 		case "GUILD_MEMBER_ADD":
 			b.ch <- entity.NewMemberAddEventData(event.Id, b.selfInfo, (*dto.Member)(data))
@@ -95,7 +96,7 @@ func (b *Bot) messageReactionEventHandler() event.MessageReactionEventHandler {
 
 func (b *Bot) interactionEventHandler() event.InteractionEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSInteractionData) error {
-		slog.Info("interaction event", "data", string(event.RawMessage))
+		slog.Info("交互事件", "self", b.selfInfo.ID, "id", event.Id, "guildID", data.GuildID, "data", string(event.RawMessage))
 		b.ch <- entity.NewInteractionEventData(event.Id, b.selfInfo, (*dto.Interaction)(data))
 		return nil
 	}
