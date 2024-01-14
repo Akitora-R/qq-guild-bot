@@ -2,12 +2,12 @@ package conn
 
 import (
 	"errors"
+	"github.com/go-resty/resty/v2"
 	"github.com/tencent-connect/botgo/dto"
 	"github.com/tencent-connect/botgo/event"
 	"log/slog"
 	"qq-guild-bot/internal/conn/entity"
 	"qq-guild-bot/internal/pkg/config"
-	"qq-guild-bot/internal/pkg/util/http"
 	"time"
 )
 
@@ -39,7 +39,7 @@ func StartGuildEventListen() {
 		for data := range ch {
 			for _, rep := range conf.Server {
 				go func(d any, server config.ServerConfig) {
-					_, _, _ = http.NewPostRequest(server.Url).SetBodyJson(d).Exec()
+					_, _ = resty.New().R().SetBody(d).Post(server.Url)
 				}(data, rep)
 			}
 		}

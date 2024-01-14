@@ -5,3 +5,5 @@ logs
 *.log
 *.sum
 node-modules
+
+*.pb.go
