@@ -18,11 +18,42 @@ const (
 	InteractionCreate     EventType = "INTERACTION_CREATE"
 )
 
-type GuildEvent[T any] struct {
+type GuildEventMessageDataConstrain interface {
+	MessageEventData |
+		MessageDeleteEventData |
+		MemberEventData |
+		MessageReactionEventData |
+		InteractionEventData
+}
+
+type GuildEvent interface {
+	GetId() string
+	GetEventType() EventType
+	GetSelf() *dto.User
+	GetData() any
+}
+
+type GuildEventData[T GuildEventMessageDataConstrain] struct {
 	Id        string    `json:"id,omitempty"`
 	EventType EventType `json:"event_type"`
 	Self      *dto.User `json:"self"`
 	Data      *T        `json:"data"`
+}
+
+func (g *GuildEventData[T]) GetId() string {
+	return g.Id
+}
+
+func (g *GuildEventData[T]) GetEventType() EventType {
+	return g.EventType
+}
+
+func (g *GuildEventData[T]) GetSelf() *dto.User {
+	return g.Self
+}
+
+func (g *GuildEventData[T]) GetData() any {
+	return g.Data
 }
 
 type MessageEventData struct {
@@ -46,8 +77,8 @@ type InteractionEventData struct {
 	*dto.Interaction
 }
 
-func NewMessageEvent(id string, self *dto.User, d *dto.Message) *GuildEvent[MessageEventData] {
-	return &GuildEvent[MessageEventData]{
+func NewMessageEvent(id string, self *dto.User, d *dto.Message) *GuildEventData[MessageEventData] {
+	return &GuildEventData[MessageEventData]{
 		Id:        id,
 		EventType: Message,
 		Self:      self,
@@ -55,8 +86,8 @@ func NewMessageEvent(id string, self *dto.User, d *dto.Message) *GuildEvent[Mess
 	}
 }
 
-func NewDirectMessageEvent(id string, self *dto.User, d *dto.Message) *GuildEvent[MessageEventData] {
-	return &GuildEvent[MessageEventData]{
+func NewDirectMessageEvent(id string, self *dto.User, d *dto.Message) *GuildEventData[MessageEventData] {
+	return &GuildEventData[MessageEventData]{
 		Id:        id,
 		EventType: DirectMessage,
 		Self:      self,
@@ -64,8 +95,8 @@ func NewDirectMessageEvent(id string, self *dto.User, d *dto.Message) *GuildEven
 	}
 }
 
-func NewMessageDeleteEvent(id string, self, opUser *dto.User, d *dto.Message) *GuildEvent[MessageDeleteEventData] {
-	return &GuildEvent[MessageDeleteEventData]{
+func NewMessageDeleteEvent(id string, self, opUser *dto.User, d *dto.Message) *GuildEventData[MessageDeleteEventData] {
+	return &GuildEventData[MessageDeleteEventData]{
 		Id:        id,
 		EventType: MessageDelete,
 		Self:      self,
@@ -73,20 +104,20 @@ func NewMessageDeleteEvent(id string, self, opUser *dto.User, d *dto.Message) *G
 	}
 }
 
-func NewMemberAddEventData(id string, self *dto.User, member *dto.Member) *GuildEvent[MemberEventData] {
+func NewMemberAddEventData(id string, self *dto.User, member *dto.Member) *GuildEventData[MemberEventData] {
 	return newMemberEventData(id, self, member, GuildMemberAdd)
 }
 
-func NewMemberUpdateEventData(id string, self *dto.User, member *dto.Member) *GuildEvent[MemberEventData] {
+func NewMemberUpdateEventData(id string, self *dto.User, member *dto.Member) *GuildEventData[MemberEventData] {
 	return newMemberEventData(id, self, member, GuildMemberUpdate)
 }
 
-func NewMemberRemoveEventData(id string, self *dto.User, member *dto.Member) *GuildEvent[MemberEventData] {
+func NewMemberRemoveEventData(id string, self *dto.User, member *dto.Member) *GuildEventData[MemberEventData] {
 	return newMemberEventData(id, self, member, GuildMemberRemove)
 }
 
-func newMemberEventData(id string, self *dto.User, member *dto.Member, eventType EventType) *GuildEvent[MemberEventData] {
-	return &GuildEvent[MemberEventData]{
+func newMemberEventData(id string, self *dto.User, member *dto.Member, eventType EventType) *GuildEventData[MemberEventData] {
+	return &GuildEventData[MemberEventData]{
 		Id:        id,
 		EventType: eventType,
 		Self:      self,
@@ -94,8 +125,8 @@ func newMemberEventData(id string, self *dto.User, member *dto.Member, eventType
 	}
 }
 
-func NewMessageReactionEventData(id string, self *dto.User, eventType EventType, data *dto.MessageReaction) *GuildEvent[MessageReactionEventData] {
-	return &GuildEvent[MessageReactionEventData]{
+func NewMessageReactionEventData(id string, self *dto.User, eventType EventType, data *dto.MessageReaction) *GuildEventData[MessageReactionEventData] {
+	return &GuildEventData[MessageReactionEventData]{
 		Id:        id,
 		EventType: eventType,
 		Self:      self,
@@ -103,8 +134,8 @@ func NewMessageReactionEventData(id string, self *dto.User, eventType EventType,
 	}
 }
 
-func NewInteractionEventData(id string, self *dto.User, data *dto.Interaction) *GuildEvent[InteractionEventData] {
-	return &GuildEvent[InteractionEventData]{
+func NewInteractionEventData(id string, self *dto.User, data *dto.Interaction) *GuildEventData[InteractionEventData] {
+	return &GuildEventData[InteractionEventData]{
 		Id:        id,
 		EventType: InteractionCreate,
 		Self:      self,

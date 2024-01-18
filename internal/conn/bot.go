@@ -10,6 +10,7 @@ import (
 	"github.com/tencent-connect/botgo/sessions/local"
 	"github.com/tencent-connect/botgo/token"
 	"log/slog"
+	"qq-guild-bot/internal/conn/entity"
 	"qq-guild-bot/internal/pkg/config"
 	"time"
 )
@@ -18,11 +19,11 @@ type Bot struct {
 	config   config.BotConfig
 	ctx      context.Context
 	api      openapi.OpenAPI
-	ch       chan any
+	ch       chan entity.GuildEvent
 	selfInfo *dto.User
 }
 
-func NewBot(config config.BotConfig, ch chan any) *Bot {
+func NewBot(config config.BotConfig, ch chan entity.GuildEvent) *Bot {
 	t := token.BotToken(config.AppID, config.AccessToken)
 	ctx := context.Background()
 	var api openapi.OpenAPI

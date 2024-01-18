@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"html/template"
 	"io"
 	"log/slog"
-	apiEntity "qq-guild-bot/internal/api/entity"
+	"qq-guild-bot/internal/api/http/entity"
 	"qq-guild-bot/internal/conn"
 	connEntity "qq-guild-bot/internal/conn/entity"
 	"qq-guild-bot/internal/embeded"
@@ -72,9 +72,9 @@ func handle(handler func(c *gin.Context, bot *conn.Bot)) func(c *gin.Context) {
 func handleErr(c *gin.Context, err error, data any) {
 	if err != nil {
 		s := err.Error()
-		c.JSON(500, apiEntity.NewErrResp[any](nil, &s))
+		c.JSON(500, entity.NewErrResp[any](nil, &s))
 	} else {
-		c.JSON(200, apiEntity.NewOkResp[any](data, nil))
+		c.JSON(200, entity.NewOkResp[any](data, nil))
 	}
 }
 
@@ -119,7 +119,7 @@ func updateMember(c *gin.Context, bot *conn.Bot) {
 
 func sendMsg(c *gin.Context, bot *conn.Bot) {
 	cId := c.Param("channelId")
-	m := util.MustParseReader[apiEntity.Message](c.Request.Body)
+	m := util.MustParseReader[entity.Message](c.Request.Body)
 	var resp connEntity.SendMessageResponse
 	var err error
 	var attachmentBytes []byte

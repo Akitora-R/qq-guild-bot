@@ -2,7 +2,6 @@ package conn
 
 import (
 	"errors"
-	"github.com/go-resty/resty/v2"
 	"github.com/tencent-connect/botgo/dto"
 	"github.com/tencent-connect/botgo/event"
 	"log/slog"
@@ -15,11 +14,11 @@ const bufferSize = 100
 
 var bots = map[string]*Bot{}
 
-// StartGuildEventListen https://github.com/tencent-connect/botgo/tree/master/examples
-func StartGuildEventListen() {
+// GetEventChan https://github.com/tencent-connect/botgo/tree/master/examples
+func GetEventChan() chan entity.GuildEvent {
 	conf := config.AppConf
+	ch := make(chan entity.GuildEvent, bufferSize)
 	go func(conf config.Config) {
-		ch := make(chan any, bufferSize)
 		for _, botConfig := range conf.Bot {
 			bot := NewBot(botConfig, ch)
 			go func() {
@@ -36,20 +35,15 @@ func StartGuildEventListen() {
 				time.Sleep(time.Second)
 			}
 		}
-		for data := range ch {
-			for _, rep := range conf.Server {
-				go func(d any, server config.ServerConfig) {
-					_, _ = resty.New().R().SetBody(d).Post(server.Url)
-				}(data, rep)
-			}
-		}
 	}(conf)
+	return ch
 }
 
 func (b *Bot) messageEventHandler() event.MessageEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSMessageData) error {
 		slog.Info("收到消息", "self", b.selfInfo.ID, "id", event.Id, "guildID", data.GuildID, "userID", data.Author.ID, "content", data.Content)
-		b.ch <- entity.NewMessageEvent(event.Id, b.selfInfo, (*dto.Message)(data))
+		e := entity.NewMessageEvent(event.Id, b.selfInfo, (*dto.Message)(data))
+		b.ch <- e
 		return nil
 	}
 }

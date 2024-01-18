@@ -6,8 +6,13 @@ import (
 )
 
 type Config struct {
-	Bot    []BotConfig    `yaml:"bot"`
-	Server []ServerConfig `yaml:"server"`
+	ConsulHost  string         `yaml:"consulHost"`
+	ConsulPort  int            `yaml:"consulPort"`
+	ServiceName string         `yaml:"serviceName"`
+	ServiceId   string         `yaml:"serviceId"`
+	GrpcPort    int            `yaml:"grpcPort"`
+	Bot         []BotConfig    `yaml:"bot"`
+	Server      []ServerConfig `yaml:"server"`
 }
 
 type BotConfig struct {

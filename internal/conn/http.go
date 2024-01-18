@@ -9,7 +9,7 @@ import (
 	"github.com/tencent-connect/botgo/dto"
 	"github.com/tencent-connect/botgo/openapi"
 	"log/slog"
-	apiEntity "qq-guild-bot/internal/api/entity"
+	apiEntity "qq-guild-bot/internal/api/http/entity"
 	"qq-guild-bot/internal/conn/entity"
 	"strconv"
 	"strings"
