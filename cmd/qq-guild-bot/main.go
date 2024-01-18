@@ -24,7 +24,7 @@ func main() {
 		panic(err)
 	}
 	gs := grpc.NewQQGuildServer(grpcCh)
-	stub.RegisterQQGuildServer(s, gs)
+	stub.RegisterQQGuildServiceServer(s, gs)
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", config.AppConf.GrpcPort))
 	if err != nil {
 		panic(err)
