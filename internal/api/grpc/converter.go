@@ -33,17 +33,20 @@ func ConvertMessageReactionEventData(data *entity.MessageReactionEventData) *stu
 }
 
 func ConvertInteractionEventData(data *entity.InteractionEventData) *stub.GuildEventData_InteractionEventData {
-	interactionData := stub.InteractionData{
-		Name:     data.Data.Name,
-		Type:     stub.InteractionDataType(data.Data.Type),
-		Resolved: data.Data.Resolved,
+	var interactionData *stub.InteractionData = nil
+	if data.Data != nil {
+		interactionData = &stub.InteractionData{
+			Name:     data.Data.Name,
+			Type:     stub.InteractionDataType(data.Data.Type),
+			Resolved: data.Data.Resolved,
+		}
 	}
 	return &stub.GuildEventData_InteractionEventData{
 		InteractionEventData: &stub.Interaction{
 			Id:            data.ID,
 			ApplicationId: data.ApplicationID,
 			Type:          stub.InteractionType(data.Type),
-			Data:          &interactionData,
+			Data:          interactionData,
 			GuildId:       data.GuildID,
 			ChannelId:     data.ChannelID,
 			Version:       data.Version,
@@ -52,11 +55,13 @@ func ConvertInteractionEventData(data *entity.InteractionEventData) *stub.GuildE
 }
 
 func convertMessageReaction(data *entity.MessageReactionEventData) *stub.MessageReaction {
-	reactionTarget := stub.ReactionTarget{
+	var reactionTarget *stub.ReactionTarget = nil
+	reactionTarget = &stub.ReactionTarget{
 		Id:   data.Target.ID,
 		Type: stub.ReactionTargetType(data.Target.Type),
 	}
-	emoji := stub.Emoji{
+	var emoji *stub.Emoji = nil
+	emoji = &stub.Emoji{
 		Id:   data.Emoji.ID,
 		Type: int32(data.Emoji.Type),
 	}
@@ -64,8 +69,8 @@ func convertMessageReaction(data *entity.MessageReactionEventData) *stub.Message
 		UserId:    data.UserID,
 		ChannelId: data.ChannelID,
 		GuildId:   data.GuildID,
-		Target:    &reactionTarget,
-		Emoji:     &emoji,
+		Target:    reactionTarget,
+		Emoji:     emoji,
 	}
 }
 
@@ -201,7 +206,7 @@ func convertEmbeds(embeds []*dto.Embed) []*stub.Embed {
 			Fields:      fields,
 		})
 	}
-	return nil
+	return r
 }
 
 func convertAttachments(as []*dto.MessageAttachment) []*stub.MessageAttachment {
