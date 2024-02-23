@@ -1,0 +1,45 @@
+name: Docker Image CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['release']
+env:
+  REGISTRY: ghcr.io
+
+permissions: write-all
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: set lower case owner name
+        run: |
+          echo "REPO=${REPO_NAME,,}" >>${GITHUB_ENV}
+        env:
+          REPO_NAME: '${{ github.repository }}'
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ghcr.io/${{ env.REPO }}:latest

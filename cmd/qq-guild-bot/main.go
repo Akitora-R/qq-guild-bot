@@ -42,10 +42,12 @@ func handleGuildEvent(ch chan entity.GuildEvent, grpcCh chan *stub.GuildEventDat
 				_, _ = resty.New().R().SetBody(d).Post(server.Url)
 			}(data, rep)
 		}
-		select {
-		case grpcCh <- convert(data):
-		case <-time.After(100 * time.Millisecond):
-		}
+		go func(d entity.GuildEvent) {
+			select {
+			case grpcCh <- convert(d):
+			case <-time.After(1000 * time.Millisecond):
+			}
+		}(data)
 	}
 }
 

@@ -8,13 +8,13 @@ require (
 	github.com/golang/protobuf v1.5.3
 	github.com/google/uuid v1.3.1
 	github.com/hashicorp/consul/api v1.26.1
-	github.com/tencent-connect/botgo v0.1.6
+	github.com/tencent-connect/botgo v0.0.0-00010101000000-000000000000
 	google.golang.org/grpc v1.60.1
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-replace github.com/tencent-connect/botgo => github.com/Akitora-R/botgo v0.0.0-20230402152725-61b800596e5e
+replace github.com/tencent-connect/botgo => github.com/Akitora-R/botgo v0.0.0-20230913123053-9f3dba8c1a3d
 
 require (
 	github.com/armon/go-metrics v0.4.1 // indirect
