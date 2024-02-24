@@ -20,10 +20,29 @@ jobs:
         env:
           REPO_NAME: '${{ github.repository }}'
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.21'
+
+      - name: Install Protocol Buffer Compiler
+        run: |
+          sudo apt update
+          sudo apt install -y protobuf-compiler
+
       - name: Check out the repo
         uses: actions/checkout@v2
         with:
           submodules: recursive
+
+      - name: Install protoc-gen-go
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+      - name: Gen Code
+        run: |
+          protoc --go_out=./ --go-grpc_out=./ .\protos\qq_guild\message.proto
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
