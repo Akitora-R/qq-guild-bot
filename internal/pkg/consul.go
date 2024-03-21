@@ -23,7 +23,7 @@ func RegisterConsul(s *grpc.Server) error {
 		Port:    config.AppConf.GrpcPort,
 		Address: config.AppConf.ConsulHost,
 		Check: &consulApi.AgentServiceCheck{
-			GRPC:     fmt.Sprintf("%s:%d", "127.0.0.1", config.AppConf.GrpcPort),
+			GRPC:     fmt.Sprintf("%s:%d", "host.docker.internal", config.AppConf.GrpcPort),
 			Interval: "10s",
 			Timeout:  "30s",
 		},
