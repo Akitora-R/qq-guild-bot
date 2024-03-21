@@ -21,7 +21,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o qq-guild-bot ./cmd/qq-guild-bot/main.go
 
 # Use scratch as the final base image to create a minimal container
-FROM scratch
+FROM alpine:latest
 
 # Copy the built application from the builder image
 COPY --from=builder /app/qq-guild-bot .
