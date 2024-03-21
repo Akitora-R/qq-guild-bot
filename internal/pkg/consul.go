@@ -15,6 +15,7 @@ import (
 
 func RegisterConsul(s *grpc.Server) error {
 	consulConfig := consulApi.DefaultConfig()
+	consulConfig.Address = fmt.Sprintf("%s:%d", config.AppConf.ConsulHost, config.AppConf.ConsulPort)
 	consul, _ := consulApi.NewClient(consulConfig)
 	serviceId := config.AppConf.ServiceId
 	registration := &consulApi.AgentServiceRegistration{
