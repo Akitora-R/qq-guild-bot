@@ -53,7 +53,7 @@ func StartHttpAPI() {
 	channelApi := group.Group("/channel/:channelId")
 	channelApi.POST("/message", handle(sendMsg))
 	channelApi.DELETE("/message/:messageId", handle(delMsg))
-	if err := engine.Run("127.0.0.1:6800"); err != nil {
+	if err := engine.Run("0.0.0.0:6800"); err != nil {
 		panic(err)
 	}
 }
