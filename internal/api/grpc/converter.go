@@ -156,6 +156,9 @@ func convertArkObjKVs(objKVs []*dto.ArkObjKV) []*stub.ArkObjKV {
 }
 
 func convertMember(member *dto.Member) *stub.Member {
+	if member == nil {
+		return nil
+	}
 	return &stub.Member{
 		GuildId:  member.GuildID,
 		JoinedAt: convertTimestamp(member.JoinedAt),
