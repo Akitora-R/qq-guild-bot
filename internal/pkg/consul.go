@@ -2,15 +2,16 @@ package pkg
 
 import (
 	"fmt"
-	consulApi "github.com/hashicorp/consul/api"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/health"
-	"google.golang.org/grpc/health/grpc_health_v1"
 	"os"
 	"os/signal"
 	"qq-guild-bot/internal/pkg/config"
 	"syscall"
 	"time"
+
+	consulApi "github.com/hashicorp/consul/api"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 func RegisterConsul(s *grpc.Server) error {
@@ -24,7 +25,7 @@ func RegisterConsul(s *grpc.Server) error {
 		Port:    config.AppConf.GrpcPort,
 		Address: config.AppConf.ConsulHost,
 		Check: &consulApi.AgentServiceCheck{
-			GRPC:     fmt.Sprintf("%s:%d", "host.docker.internal", config.AppConf.GrpcPort),
+			GRPC:     fmt.Sprintf("%s:%d", config.AppConf.ServiceName, config.AppConf.GrpcPort),
 			Interval: "10s",
 			Timeout:  "30s",
 		},
